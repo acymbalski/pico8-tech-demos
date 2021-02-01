@@ -3,12 +3,10 @@ version 29
 __lua__
 
 maze = {}
-maze.w = 15
-maze.h = 15
+maze.w = 60
+maze.h = 60
 maze.cells = {}
-maze.color = 5
-maze.cellsize = 8
-colstep = 14
+maze.color = 14
 
 -- called by program to initialize variables
 function _init()
@@ -20,36 +18,26 @@ function _init()
             c.x = i
             c.y = j
             c.seen = 0
+            c.neighbors = {}
             maze.cells[i][j] = c
         end
     end
     
     cls()
 
-    -- draw (just once!)
+    genstep(maze.cells[0][0])
+
     cs = maze.cellsize
     for x = 0, maze.w do
         for y = 0, maze.h do
-            rectfill(x * cs + (cs / 4), y * cs + (cs / 4),
-                    (x + 1) * cs - (cs / 4), (y + 1) * cs - (cs / 4),
+            for n in all(maze.cells[x][y].neighbors) do
+
+                line(x * 2, y * 2,
+                    n.x * 2, n.y * 2,
                     maze.color)
+            end
         end
     end
-    
-    genstep(maze.cells[0][0])
-
-
-    x = 0
-    y = 0
-    rectfill(x * cs + (cs / 4), y * cs + (cs / 4),
-            (x + 1) * cs - (cs / 4), (y + 1) * cs - (cs / 4),
-            maze.color + 2)
-    
-    x = maze.w
-    y = maze.h
-    rectfill(x * cs + (cs / 4), y * cs + (cs / 4),
-            (x + 1) * cs - (cs / 4), (y + 1) * cs - (cs / 4),
-            maze.color + 3)
 
 end
 
@@ -102,15 +90,9 @@ function genstep(cell)
         -- choose one
         local nextn = rnd(n)
         -- it may be that this neighbor has since been seen - check again
-        if nextn.seen == 0 then
+        if nextn.seen == 0 or flr(rnd(20)) == 1 then
             -- remove wall between cell and neighbor
-            -- (in this example, draw a line)
-            line(cell.x * cs + cs / 2, cell.y * cs + cs / 2,
-                nextn.x * cs + cs / 2, nextn.y * cs + cs / 2,
-                colstep)
-            -- colstep = colstep + 1
-            -- if colstep > 15 then colstep = 0 end
-
+            add(maze.cells[cell.x][cell.y].neighbors, nextn)
             -- invoke this function for neighbor
             genstep(nextn)
         end
